@@ -8,8 +8,7 @@ const HomePage = () => {
     const navigate = useNavigate();
     const [tournaments, setTournaments] = useState<Tournament[]>([]);
     const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [activeTab, setActiveTab] = useState<'open' | 'closed'>('open');
+
 
     useEffect(() => {
         fetchTournaments();
@@ -32,108 +31,64 @@ const HomePage = () => {
     };
 
     // Filter Logic
-    const filteredTournaments = tournaments.filter((t) => {
-        const matchesSearch = t.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            t.sport.toLowerCase().includes(searchTerm.toLowerCase());
-
-        // Status Logic
-        const isExpired = new Date(t.registration_deadline) < new Date();
-        const isClosed = t.status === 'closed';
-        const isOpen = !isClosed && !isExpired;
-
-        const matchesTab = activeTab === 'open' ? isOpen : (isClosed || isExpired);
-
-        return matchesSearch && matchesTab;
-    });
+    const filteredTournaments = tournaments;
 
 
 
     return (
         <div className="min-h-screen pt-24 md:pt-32 pb-12">
 
-            {/* Hero Section */}
-            <section className="relative container-custom mb-16 overflow-hidden sm:pt-16">
-                <div className="absolute top-0 right-0 -z-10 w-96 h-96 bg-purple-600/30 rounded-full blur-[128px] animate-pulse-glow" />
-                <div className="absolute bottom-0 left-0 -z-10 w-96 h-96 bg-indigo-600/30 rounded-full blur-[128px] animate-pulse-glow" style={{ animationDelay: '1s' }} />
+            {/* Hero Section - Maximum Spacing */}
+            <section className="relative container-custom pt-20 pb-40 md:pt-32 md:pb-64 overflow-hidden">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-5xl -z-10 opacity-40">
+                    <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px] animate-pulse-glow" />
+                    <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[120px] animate-pulse-glow" style={{ animationDelay: '1.5s' }} />
+                </div>
 
-                <div className="text-center max-w-3xl mx-auto space-y-6">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-sm font-medium animate-slide-up">
-                        <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                <div className="text-center max-w-4xl mx-auto">
+                    <div className="flex justify-center mb-8">
+                        <span className="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-indigo-300 text-xs font-bold tracking-[0.2em] uppercase backdrop-blur-sm">
+                            The Future of Campus Athletics
                         </span>
-                        Registration Open for Spring 2026
                     </div>
 
-                    <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-white animate-slide-up" style={{ animationDelay: '0.1s' }}>
-                        Unleash Your <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 animate-gradient-x">
-                            Inner Champion
+                    <h1 className="text-6xl md:text-8xl font-black tracking-tight text-white mb-8 leading-[0.95]">
+                        UNLEASH YOUR<br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 italic">
+                            INNER CHAMPION
                         </span>
                     </h1>
 
-                    <p className="text-xl text-gray-400 max-w-2xl mx-auto animate-slide-up" style={{ animationDelay: '0.2s' }}>
-                        Join the ultimate campus sports league. Compete, connect, and conquer in tournaments designed for legends.
+                    <p className="text-xl md:text-2xl text-gray-400 max-w-2xl mx-auto mb-12 font-medium leading-relaxed">
+                        Experience the heat of competition. Join the ultimate league where campus legends are born and records are shattered.
                     </p>
 
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 animate-slide-up" style={{ animationDelay: '0.3s' }}>
+                    <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
                         <button
                             onClick={() => document.getElementById('tournaments-grid')?.scrollIntoView({ behavior: 'smooth' })}
-                            className="btn-primary"
+                            className="btn-primary px-8 py-4 text-lg shadow-[0_0_40px_-10px_rgba(99,102,241,0.5)] active:scale-95"
                         >
                             Explore Tournaments
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                            <svg className="w-5 h-5 group-hover:translate-y-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                             </svg>
                         </button>
-                        <button onClick={() => navigate('/leaderboard')} className="btn-glass backdrop-blur-md">
+                        <button
+                            onClick={() => navigate('/leaderboard')}
+                            className="px-8 py-4 text-lg font-bold text-white bg-white/5 border border-white/10 rounded-full hover:bg-white/10 transition-all backdrop-blur-md active:scale-95"
+                        >
                             View Leaderboard
                         </button>
                     </div>
                 </div>
             </section>
 
-            {/* Main Content Area */}
-            <div id="tournaments-grid" className="container-custom">
-
-                {/* Controls Bar */}
-                <div className="flex flex-col lg:flex-row items-center justify-between gap-6 mb-16 glass-panel p-4 rounded-3xl md:sticky md:top-24 z-30">
-
-                    {/* Tabs */}
-                    <div className="flex p-1 bg-gray-900/50 rounded-xl">
-                        <button
-                            onClick={() => setActiveTab('open')}
-                            className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'open'
-                                ? 'bg-indigo-600 text-white shadow-lg'
-                                : 'text-gray-400 hover:text-white'
-                                }`}
-                        >
-                            Open Now
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('closed')}
-                            className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'closed'
-                                ? 'bg-indigo-600 text-white shadow-lg'
-                                : 'text-gray-400 hover:text-white'
-                                }`}
-                        >
-                            Past / Closed
-                        </button>
-                    </div>
-
-                    {/* Search */}
-                    <div className="relative w-full lg:max-w-md group">
-                        <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-indigo-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                        <input
-                            type="text"
-                            placeholder="Search tournaments..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full bg-gray-900/50 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
-                        />
-                    </div>
+            {/* Main Content Area - Clean Break */}
+            <div id="tournaments-grid" className="container-custom pt-40 md:pt-56 pb-24 relative z-10">
+                <div className="flex flex-col items-center mb-20 text-center mt-12 md:mt-24">
+                    <span className="text-indigo-500 font-bold tracking-widest uppercase text-xs mb-3">Live Events</span>
+                    <h2 className="text-4xl md:text-5xl font-black text-white mb-6">Upcoming Tournaments</h2>
+                    <div className="w-24 h-1.5 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"></div>
                 </div>
 
                 {/* Grid */}
@@ -152,16 +107,10 @@ const HomePage = () => {
                             </svg>
                         </div>
                         <h3 className="text-2xl font-bold text-white mb-2">No tournaments found</h3>
-                        <p className="text-gray-400">Try adjusting your search terms.</p>
-                        <button
-                            onClick={() => { setSearchTerm(''); }}
-                            className="mt-6 text-indigo-400 hover:text-indigo-300 font-semibold"
-                        >
-                            Clear search
-                        </button>
+                        <p className="text-gray-400">Please check back later for new events.</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-20">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-32">
                         {filteredTournaments.map((tournament) => (
                             <TournamentCard key={tournament.id} tournament={tournament} />
                         ))}
