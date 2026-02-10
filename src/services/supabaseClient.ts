@@ -32,6 +32,16 @@ export interface Registration {
     created_at: string;
 }
 
+export interface Leaderboard {
+    id: string;
+    tournament_id: string;
+    rank: number;
+    participant_name: string;
+    score?: string;
+    achievement?: string;
+    created_at: string;
+}
+
 // Future auth-ready type
 export interface User {
     id: string;

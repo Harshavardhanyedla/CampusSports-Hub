@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { Tournament } from '../../services/supabaseClient'; // Adjusted import to use type-only
 import { supabase } from '../../services/supabaseClient';
 import TournamentCard from '../../components/TournamentCard';
 
 const HomePage = () => {
+    const navigate = useNavigate();
     const [tournaments, setTournaments] = useState<Tournament[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -87,7 +89,7 @@ const HomePage = () => {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                             </svg>
                         </button>
-                        <button className="btn-glass backdrop-blur-md">
+                        <button onClick={() => navigate('/leaderboard')} className="btn-glass backdrop-blur-md">
                             View Leaderboard
                         </button>
                     </div>

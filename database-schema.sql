@@ -140,6 +140,37 @@ VALUES
      '2026-03-01 08:00:00+05:30', 'Badminton Hall', '2026-02-25 23:59:59+05:30', 'individual', 'open');
 
 -- =====================================================
+-- LEADERBOARDS TABLE
+-- =====================================================
+CREATE TABLE IF NOT EXISTS leaderboards (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    tournament_id UUID NOT NULL REFERENCES tournaments(id) ON DELETE CASCADE,
+    rank INT NOT NULL,
+    participant_name VARCHAR(255) NOT NULL,
+    score VARCHAR(100),
+    achievement VARCHAR(255), -- e.g. "Winner", "Best Player"
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_leaderboards_tournament ON leaderboards(tournament_id);
+CREATE INDEX idx_leaderboards_rank ON leaderboards(rank);
+
+-- RLS for Leaderboards
+ALTER TABLE leaderboards ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "leaderboards_public_read" ON leaderboards
+    FOR SELECT USING (true);
+
+CREATE POLICY "leaderboards_admin_insert" ON leaderboards
+    FOR INSERT WITH CHECK (true); -- TODO: Tighten to admin only later
+
+CREATE POLICY "leaderboards_admin_update" ON leaderboards
+    FOR UPDATE USING (true);
+
+CREATE POLICY "leaderboards_admin_delete" ON leaderboards
+    FOR DELETE USING (true);
+
+-- =====================================================
 -- NOTES FOR FUTURE AUTH IMPLEMENTATION
 -- =====================================================
 -- When adding authentication:

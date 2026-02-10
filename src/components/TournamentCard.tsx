@@ -76,15 +76,20 @@ const TournamentCard = ({ tournament, showActions, onEdit, onDelete }: Tournamen
                 <div className="mt-6 pt-4 border-t border-white/5 flex gap-3">
                     {showActions ? (
                         <>
-                            <button onClick={onEdit} className="flex-1 py-2 px-4 bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-semibold rounded-xl transition-all">
-                                Edit
-                            </button>
-                            <button onClick={onDelete} className="flex-1 py-2 px-4 bg-red-500/80 hover:bg-red-600 text-white text-sm font-semibold rounded-xl transition-all">
-                                Delete
-                            </button>
-                            <Link to={`/admin/registrations/${tournament.id}`} className="flex-1 py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white text-center text-sm font-semibold rounded-xl transition-all">
-                                View
-                            </Link>
+                            <div className="grid grid-cols-2 gap-2 w-full">
+                                <button onClick={onEdit} className="py-2 px-4 bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-semibold rounded-xl transition-all">
+                                    Edit
+                                </button>
+                                <button onClick={onDelete} className="py-2 px-4 bg-red-500/80 hover:bg-red-600 text-white text-sm font-semibold rounded-xl transition-all">
+                                    Delete
+                                </button>
+                                <Link to={`/admin/registrations/${tournament.id}`} className="py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white text-center text-sm font-semibold rounded-xl transition-all">
+                                    Regs
+                                </Link>
+                                <Link to={`/admin/leaderboard/${tournament.id}`} className="py-2 px-4 bg-amber-600 hover:bg-amber-500 text-white text-center text-sm font-semibold rounded-xl transition-all">
+                                    Results
+                                </Link>
+                            </div>
                         </>
                     ) : (
                         <>

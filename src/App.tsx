@@ -9,6 +9,8 @@ import AdminDashboard from './pages/Admin/AdminDashboard';
 import CreateTournament from './pages/Admin/CreateTournament';
 import EditTournament from './pages/Admin/EditTournament';
 import ViewRegistrations from './pages/Admin/ViewRegistrations';
+import ManageLeaderboard from './pages/Admin/ManageLeaderboard';
+import PublicLeaderboard from './pages/Public/Leaderboard';
 import AdminLogin from './pages/Admin/Login';
 import { ModalProvider } from './context/ModalContext';
 
@@ -32,6 +34,7 @@ function App() {
               <Route path="/tournament/:id" element={<TournamentDetail />} />
               <Route path="/register/:id" element={<Register />} />
               <Route path="/my-registrations" element={<MyRegistrations />} />
+              <Route path="/leaderboard" element={<PublicLeaderboard />} />
 
               {/* Admin Login */}
               <Route path="/admin/login" element={<AdminLogin />} />
@@ -55,6 +58,11 @@ function App() {
               <Route path="/admin/registrations/:id" element={
                 <ProtectedRoute>
                   <ViewRegistrations />
+                </ProtectedRoute>
+              } />
+              <Route path="/admin/leaderboard/:id" element={
+                <ProtectedRoute>
+                  <ManageLeaderboard />
                 </ProtectedRoute>
               } />
             </Routes>
