@@ -62,6 +62,9 @@ const Register = () => {
 
             if (error) throw error;
 
+            // Backup in localStorage just in case state is lost
+            localStorage.setItem('last_registered_email', normalizedData.email);
+
             // Redirect to my-registrations and pass the email so it loads instantly
             navigate('/my-registrations', { state: { email: normalizedData.email } });
         } catch (error: any) {

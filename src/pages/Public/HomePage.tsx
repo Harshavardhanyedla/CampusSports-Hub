@@ -9,7 +9,6 @@ const HomePage = () => {
     const [tournaments, setTournaments] = useState<Tournament[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedSport, setSelectedSport] = useState('All');
     const [activeTab, setActiveTab] = useState<'open' | 'closed'>('open');
 
     useEffect(() => {
@@ -36,7 +35,6 @@ const HomePage = () => {
     const filteredTournaments = tournaments.filter((t) => {
         const matchesSearch = t.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
             t.sport.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesSport = selectedSport === 'All' || t.sport === selectedSport;
 
         // Status Logic
         const isExpired = new Date(t.registration_deadline) < new Date();
@@ -45,11 +43,10 @@ const HomePage = () => {
 
         const matchesTab = activeTab === 'open' ? isOpen : (isClosed || isExpired);
 
-        return matchesSearch && matchesSport && matchesTab;
+        return matchesSearch && matchesTab;
     });
 
-    // Get unique sports for filter pills
-    const sports = ['All', ...new Set(tournaments.map(t => t.sport))];
+
 
     return (
         <div className="min-h-screen pt-24 md:pt-32 pb-12">
@@ -139,22 +136,6 @@ const HomePage = () => {
                     </div>
                 </div>
 
-                {/* Sport Filters (Pills) */}
-                <div className="flex flex-wrap gap-3 mb-12 justify-center">
-                    {sports.map((sport) => (
-                        <button
-                            key={sport}
-                            onClick={() => setSelectedSport(sport)}
-                            className={`px-5 py-2 rounded-full text-sm font-medium border transition-all duration-300 transform hover:scale-105 ${selectedSport === sport
-                                ? 'bg-white text-gray-900 border-white shadow-[0_0_20px_rgba(255,255,255,0.3)]'
-                                : 'bg-transparent text-gray-400 border-white/10 hover:border-white/30 hover:text-white'
-                                }`}
-                        >
-                            {sport}
-                        </button>
-                    ))}
-                </div>
-
                 {/* Grid */}
                 {loading ? (
                     <div className="flex justify-center py-20">
@@ -171,12 +152,12 @@ const HomePage = () => {
                             </svg>
                         </div>
                         <h3 className="text-2xl font-bold text-white mb-2">No tournaments found</h3>
-                        <p className="text-gray-400">Try adjusting your filters or search terms.</p>
+                        <p className="text-gray-400">Try adjusting your search terms.</p>
                         <button
-                            onClick={() => { setSearchTerm(''); setSelectedSport('All'); }}
+                            onClick={() => { setSearchTerm(''); }}
                             className="mt-6 text-indigo-400 hover:text-indigo-300 font-semibold"
                         >
-                            Clear all filters
+                            Clear search
                         </button>
                     </div>
                 ) : (

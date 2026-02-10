@@ -23,17 +23,29 @@ const MyRegistrations = () => {
 
         setLoading(true);
         setSearched(true);
+        setRegistrations([]); // Clear previous results
 
         try {
-            // Use .ilike for case-insensitive matching in PostgREST
+            // Use .eq for exact match as we already normalized the data
             const { data, error } = await supabase
                 .from('registrations')
-                .select('*, tournaments(*)')
-                .ilike('email', trimmedEmail)
+                .select(`
+                    *,
+                    tournaments (*)
+                `)
+                .eq('email', trimmedEmail)
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
-            setRegistrations(data as any || []);
+
+            // Map data correctly just in case Supabase returns it differently
+            const formattedData = (data as any[] || []).map(reg => ({
+                ...reg,
+                // Handle various join naming conventions just in case
+                tournaments: reg.tournaments || reg.tournament || {}
+            }));
+
+            setRegistrations(formattedData as RegistrationWithTournament[]);
         } catch (error: any) {
             console.error('Error fetching registrations:', error);
             showAlert('Search Failed', 'Could not retrieve your registrations. Please try again.');
@@ -42,18 +54,24 @@ const MyRegistrations = () => {
         }
     }, [showAlert]);
 
-    // Handle automatic fetch if state is passed from Register page
+    // Handle initial load if email is passed or stored
     useEffect(() => {
         const state = location.state as { email?: string };
-        if (state?.email) {
-            const emailFromState = state.email;
-            setEmail(emailFromState);
-            fetchRegistrations(emailFromState);
+        const storedEmail = localStorage.getItem('last_registered_email');
 
-            // Properly clear the state in React Router to prevent refetch on refresh
-            navigate(location.pathname, { replace: true, state: {} });
+        const emailToSearch = state?.email || storedEmail;
+
+        if (emailToSearch) {
+            setEmail(emailToSearch);
+            fetchRegistrations(emailToSearch);
+
+            // Clear state and storage after loading
+            if (state?.email) {
+                navigate(location.pathname, { replace: true, state: {} });
+            }
+            localStorage.removeItem('last_registered_email');
         }
-    }, [location, fetchRegistrations, navigate]);
+    }, [location.state, location.pathname, fetchRegistrations, navigate]);
 
     return (
         <div className="min-h-screen container-custom py-12">
