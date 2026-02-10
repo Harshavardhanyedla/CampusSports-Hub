@@ -103,13 +103,15 @@ const Navbar = () => {
                 </button>
             </div>
 
-            {/* Mobile Menu Overlay */}
+            {/* Mobile Menu Overlay - Premium Center Pop */}
             <div
-                className={`md:hidden fixed inset-0 bg-[#020617] bg-opacity-100 z-[90] transition-transform duration-300 ease-in-out ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+                className={`md:hidden fixed inset-0 w-screen h-screen bg-[#020617] backdrop-blur-xl transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] ${mobileMenuOpen
+                        ? 'opacity-100 visible pointer-events-auto z-[90]'
+                        : 'opacity-0 invisible pointer-events-none z-[-1]'
                     }`}
-                style={{ top: '0', paddingTop: '100px' }}
             >
-                <div className="flex flex-col items-center gap-8 p-8">
+                <div className={`flex flex-col items-center justify-center gap-10 h-full p-8 transition-all duration-500 delay-75 ${mobileMenuOpen ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-12 scale-90 opacity-0'
+                    }`}>
                     {isAdminPath && isAdminAuth ? (
                         <>
                             <MobileNavLink to="/admin" onClick={() => setMobileMenuOpen(false)}>Dashboard</MobileNavLink>
@@ -117,22 +119,27 @@ const Navbar = () => {
                             <MobileNavLink to="/" onClick={() => setMobileMenuOpen(false)}>Public View</MobileNavLink>
                             <button
                                 onClick={handleLogout}
-                                className="text-2xl font-semibold text-red-400"
+                                className="text-3xl font-black text-red-400 hover:text-red-300 transition-colors mt-4"
                             >
                                 Logout
                             </button>
                         </>
                     ) : (
                         <>
-                            <MobileNavLink to="/" onClick={() => setMobileMenuOpen(false)}>Tournaments</MobileNavLink>
-                            <MobileNavLink to="/my-registrations" onClick={() => setMobileMenuOpen(false)}>My Registrations</MobileNavLink>
-                            <Link
-                                to={isAdminAuth ? "/admin" : "/admin/login"}
-                                className="w-full text-center px-6 py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-lg shadow-lg"
-                                onClick={() => setMobileMenuOpen(false)}
-                            >
-                                {isAdminAuth ? "Admin Dashboard" : "Admin Panel"}
-                            </Link>
+                            <div className="flex flex-col items-center gap-8">
+                                <MobileNavLink to="/" onClick={() => setMobileMenuOpen(false)}>Tournaments</MobileNavLink>
+                                <MobileNavLink to="/my-registrations" onClick={() => setMobileMenuOpen(false)}>My Registrations</MobileNavLink>
+                            </div>
+
+                            <div className="w-full max-w-xs pt-8 border-t border-white/10">
+                                <Link
+                                    to={isAdminAuth ? "/admin" : "/admin/login"}
+                                    className="block w-full text-center px-8 py-5 rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white font-black text-xl shadow-[0_0_40px_-5px_rgba(99,102,241,0.4)] active:scale-95 transition-all"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    {isAdminAuth ? "Admin Dashboard" : "Admin Panel Access"}
+                                </Link>
+                            </div>
                         </>
                     )}
                 </div>
