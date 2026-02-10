@@ -44,16 +44,26 @@ const Register = () => {
         if (!validateForm()) return;
 
         setSubmitting(true);
+        // Normalize email to lowercase and trim all fields
+        const normalizedData = {
+            ...formData,
+            student_name: formData.student_name.trim(),
+            email: formData.email.trim().toLowerCase(),
+            college_id: formData.college_id.trim(),
+            department: formData.department.trim(),
+            phone: formData.phone.trim(),
+        };
+
         try {
             const { error } = await supabase.from('registrations').insert({
                 tournament_id: id,
-                ...formData,
+                ...normalizedData,
             });
 
             if (error) throw error;
 
             // Redirect to my-registrations and pass the email so it loads instantly
-            navigate('/my-registrations', { state: { email: formData.email } });
+            navigate('/my-registrations', { state: { email: normalizedData.email } });
         } catch (error: any) {
             console.error('Error:', error);
             showAlert('Registration Failed', error.message || 'Something went wrong. Please try again.');
