@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
+import ProtectedRoute from './components/ProtectedRoute';
 import HomePage from './pages/Public/HomePage';
 import TournamentDetail from './pages/Public/TournamentDetail';
 import Register from './pages/Public/Register';
@@ -8,6 +9,7 @@ import AdminDashboard from './pages/Admin/AdminDashboard';
 import CreateTournament from './pages/Admin/CreateTournament';
 import EditTournament from './pages/Admin/EditTournament';
 import ViewRegistrations from './pages/Admin/ViewRegistrations';
+import AdminLogin from './pages/Admin/Login';
 
 function App() {
   return (
@@ -29,11 +31,30 @@ function App() {
             <Route path="/register/:id" element={<Register />} />
             <Route path="/my-registrations" element={<MyRegistrations />} />
 
-            {/* Admin Routes */}
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/create" element={<CreateTournament />} />
-            <Route path="/admin/edit/:id" element={<EditTournament />} />
-            <Route path="/admin/registrations/:id" element={<ViewRegistrations />} />
+            {/* Admin Login */}
+            <Route path="/admin/login" element={<AdminLogin />} />
+
+            {/* Protected Admin Routes */}
+            <Route path="/admin" element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/create" element={
+              <ProtectedRoute>
+                <CreateTournament />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/edit/:id" element={
+              <ProtectedRoute>
+                <EditTournament />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/registrations/:id" element={
+              <ProtectedRoute>
+                <ViewRegistrations />
+              </ProtectedRoute>
+            } />
           </Routes>
         </main>
 

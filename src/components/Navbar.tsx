@@ -1,11 +1,19 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
     const location = useLocation();
+    const navigate = useNavigate();
     const isAdminPath = location.pathname.startsWith('/admin');
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [isAdminAuth, setIsAdminAuth] = useState(false);
+
+    // Check auth status
+    useEffect(() => {
+        const authStatus = localStorage.getItem('isAdminAuthenticated') === 'true';
+        setIsAdminAuth(authStatus);
+    }, [location]);
 
     // Handle scroll effect
     useEffect(() => {
@@ -20,6 +28,12 @@ const Navbar = () => {
     useEffect(() => {
         setMobileMenuOpen(false);
     }, [location]);
+
+    const handleLogout = () => {
+        localStorage.removeItem('isAdminAuthenticated');
+        setIsAdminAuth(false);
+        navigate('/');
+    };
 
     return (
         <nav
@@ -46,23 +60,29 @@ const Navbar = () => {
 
                 {/* Desktop Navigation */}
                 <div className="hidden md:flex items-center gap-8">
-                    {isAdminPath ? (
+                    {isAdminPath && isAdminAuth ? (
                         <>
                             <NavLink to="/admin">Dashboard</NavLink>
                             <NavLink to="/admin/create">Create Tournament</NavLink>
                             <Link to="/" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">
                                 Public View
                             </Link>
+                            <button
+                                onClick={handleLogout}
+                                className="text-sm font-semibold text-red-400 hover:text-red-300 transition-colors"
+                            >
+                                Logout
+                            </button>
                         </>
                     ) : (
                         <>
                             <NavLink to="/">Tournaments</NavLink>
                             <NavLink to="/my-registrations">My Registrations</NavLink>
                             <Link
-                                to="/admin"
+                                to={isAdminAuth ? "/admin" : "/admin/login"}
                                 className="px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-semibold backdrop-blur-md transition-all border border-white/10 hover:border-white/20"
                             >
-                                Admin Login
+                                {isAdminAuth ? "Admin Dashboard" : "Admin Panel"}
                             </Link>
                         </>
                     )}
@@ -90,22 +110,28 @@ const Navbar = () => {
                 style={{ top: '0', paddingTop: '80px' }}
             >
                 <div className="flex flex-col items-center gap-8 p-8">
-                    {isAdminPath ? (
+                    {isAdminPath && isAdminAuth ? (
                         <>
                             <MobileNavLink to="/admin" onClick={() => setMobileMenuOpen(false)}>Dashboard</MobileNavLink>
                             <MobileNavLink to="/admin/create" onClick={() => setMobileMenuOpen(false)}>Create Tournament</MobileNavLink>
-                            <MobileNavLink to="/" onClick={() => setMobileMenuOpen(false)}>Switch to Public</MobileNavLink>
+                            <MobileNavLink to="/" onClick={() => setMobileMenuOpen(false)}>Public View</MobileNavLink>
+                            <button
+                                onClick={handleLogout}
+                                className="text-2xl font-semibold text-red-400"
+                            >
+                                Logout
+                            </button>
                         </>
                     ) : (
                         <>
                             <MobileNavLink to="/" onClick={() => setMobileMenuOpen(false)}>Tournaments</MobileNavLink>
                             <MobileNavLink to="/my-registrations" onClick={() => setMobileMenuOpen(false)}>My Registrations</MobileNavLink>
                             <Link
-                                to="/admin"
+                                to={isAdminAuth ? "/admin" : "/admin/login"}
                                 className="w-full text-center px-6 py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-lg shadow-lg"
                                 onClick={() => setMobileMenuOpen(false)}
                             >
-                                Admin Panel
+                                {isAdminAuth ? "Admin Dashboard" : "Admin Panel"}
                             </Link>
                         </>
                     )}
