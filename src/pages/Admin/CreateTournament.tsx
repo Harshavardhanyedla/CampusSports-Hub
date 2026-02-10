@@ -5,7 +5,6 @@ import { supabase } from '../../services/supabaseClient';
 const CreateTournament = () => {
     const navigate = useNavigate();
     const [submitting, setSubmitting] = useState(false);
-
     const [formData, setFormData] = useState({
         title: '',
         sport: '',
@@ -15,273 +14,144 @@ const CreateTournament = () => {
         venue: '',
         registration_deadline_date: '',
         registration_deadline_time: '',
-        team_size: 'individual' as 'individual' | 'team',
-        status: 'open' as 'open' | 'closed',
+        team_size: 'individual',
+        status: 'open',
     });
-
-    const [errors, setErrors] = useState<Record<string, string>>({});
-
-    const validateForm = () => {
-        const newErrors: Record<string, string> = {};
-
-        if (!formData.title.trim()) newErrors.title = 'Tournament title is required';
-        if (!formData.sport.trim()) newErrors.sport = 'Sport is required';
-        if (!formData.description.trim()) newErrors.description = 'Description is required';
-        if (!formData.date) newErrors.date = 'Tournament date is required';
-        if (!formData.time) newErrors.time = 'Tournament time is required';
-        if (!formData.venue.trim()) newErrors.venue = 'Venue is required';
-        if (!formData.registration_deadline_date) newErrors.registration_deadline_date = 'Registration deadline date is required';
-        if (!formData.registration_deadline_time) newErrors.registration_deadline_time = 'Registration deadline time is required';
-
-        // Validate deadline is before tournament date
-        if (formData.date && formData.registration_deadline_date) {
-            const tournamentDate = new Date(`${formData.date}T${formData.time || '00:00'}`);
-            const deadlineDate = new Date(`${formData.registration_deadline_date}T${formData.registration_deadline_time || '00:00'}`);
-
-            if (deadlineDate >= tournamentDate) {
-                newErrors.registration_deadline_date = 'Registration deadline must be before tournament date';
-            }
-        }
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        if (!validateForm()) return;
-
         setSubmitting(true);
 
         try {
-            const tournamentDateTime = `${formData.date}T${formData.time}`;
-            const deadlineDateTime = `${formData.registration_deadline_date}T${formData.registration_deadline_time}`;
+            // Combine date and time
+            const tournamentDate = new Date(`${formData.date}T${formData.time}`);
+            const deadlineDate = new Date(`${formData.registration_deadline_date}T${formData.registration_deadline_time}`);
 
-            const { error } = await supabase.from('tournaments').insert([
-                {
-                    title: formData.title,
-                    sport: formData.sport,
-                    description: formData.description,
-                    date: tournamentDateTime,
-                    venue: formData.venue,
-                    registration_deadline: deadlineDateTime,
-                    team_size: formData.team_size,
-                    status: formData.status,
-                },
-            ]);
+            const { error } = await supabase.from('tournaments').insert([{
+                title: formData.title,
+                sport: formData.sport,
+                description: formData.description,
+                date: tournamentDate.toISOString(),
+                venue: formData.venue,
+                registration_deadline: deadlineDate.toISOString(),
+                team_size: formData.team_size,
+                status: formData.status,
+            }]);
 
             if (error) throw error;
 
-            alert('Tournament created successfully!');
             navigate('/admin');
-        } catch (error) {
-            console.error('Error creating tournament:', error);
-            alert('Failed to create tournament. Please try again.');
+        } catch (error: any) {
+            console.error('Error:', error);
+            alert('Failed to create tournament: ' + error.message);
         } finally {
             setSubmitting(false);
         }
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value,
-        });
-        if (errors[e.target.name]) {
-            setErrors({
-                ...errors,
-                [e.target.name]: '',
-            });
-        }
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
     return (
-        <div className="min-h-screen py-12">
-            <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="card">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-6">Create New Tournament</h1>
+        <div className="min-h-screen container-custom py-12 flex flex-col items-center justify-center">
+            <div className="w-full max-w-4xl">
+                <div className="flex items-center justify-between mb-8">
+                    <div>
+                        <h1 className="text-3xl font-bold text-white">Create New Tournament</h1>
+                        <p className="text-gray-400">Launch a new event for the campus.</p>
+                    </div>
+                    <button onClick={() => navigate('/admin')} className="text-gray-400 hover:text-white transition-colors">
+                        Cancel
+                    </button>
+                </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* Tournament Title */}
-                        <div>
-                            <label className="label">
-                                Tournament Title <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                name="title"
-                                value={formData.title}
-                                onChange={handleChange}
-                                className={`input-field ${errors.title ? 'border-red-500' : ''}`}
-                                placeholder="e.g., Inter-College Cricket Championship 2026"
-                            />
-                            {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
-                        </div>
+                <div className="glass-panel p-8 md:p-10 rounded-3xl border border-white/5 relative overflow-hidden">
+                    <form onSubmit={handleSubmit} className="space-y-8 relative z-10">
 
-                        {/* Sport */}
-                        <div>
-                            <label className="label">
-                                Sport <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                name="sport"
-                                value={formData.sport}
-                                onChange={handleChange}
-                                className={`input-field ${errors.sport ? 'border-red-500' : ''}`}
-                                placeholder="e.g., Cricket, Basketball, Football"
-                            />
-                            {errors.sport && <p className="text-red-500 text-sm mt-1">{errors.sport}</p>}
-                        </div>
-
-                        {/* Description */}
-                        <div>
-                            <label className="label">
-                                Description <span className="text-red-500">*</span>
-                            </label>
-                            <textarea
-                                name="description"
-                                value={formData.description}
-                                onChange={handleChange}
-                                rows={4}
-                                className={`input-field ${errors.description ? 'border-red-500' : ''}`}
-                                placeholder="Describe the tournament, rules, format, prizes, etc."
-                            />
-                            {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
-                        </div>
-
-                        {/* Date and Time */}
-                        <div className="grid md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="label">
-                                    Tournament Date <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="date"
-                                    name="date"
-                                    value={formData.date}
-                                    onChange={handleChange}
-                                    className={`input-field ${errors.date ? 'border-red-500' : ''}`}
-                                />
-                                {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date}</p>}
+                        {/* Section 1: Basic Info */}
+                        <div className="space-y-6">
+                            <h3 className="text-xl font-semibold text-white border-b border-white/10 pb-2">Basic Info</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <InputField label="Tournament Title" name="title" value={formData.title} onChange={handleChange} required placeholder="e.g. Winter Badminton Cup" />
+                                <InputField label="Sport" name="sport" value={formData.sport} onChange={handleChange} required placeholder="e.g. Badminton" />
                             </div>
-                            <div>
-                                <label className="label">
-                                    Tournament Time <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="time"
-                                    name="time"
-                                    value={formData.time}
-                                    onChange={handleChange}
-                                    className={`input-field ${errors.time ? 'border-red-500' : ''}`}
-                                />
-                                {errors.time && <p className="text-red-500 text-sm mt-1">{errors.time}</p>}
+                            <TextAreaField label="Description" name="description" value={formData.description} onChange={handleChange} rows={4} placeholder="About the tournament..." />
+                        </div>
+
+                        {/* Section 2: Schedule & Venue */}
+                        <div className="space-y-6">
+                            <h3 className="text-xl font-semibold text-white border-b border-white/10 pb-2">Schedule & Venue</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <InputField type="date" label="Event Date" name="date" value={formData.date} onChange={handleChange} required />
+                                <InputField type="time" label="Event Time" name="time" value={formData.time} onChange={handleChange} required />
+                            </div>
+                            <InputField label="Venue" name="venue" value={formData.venue} onChange={handleChange} required placeholder="e.g. Main Stadium" />
+                        </div>
+
+                        {/* Section 3: Registration Rules */}
+                        <div className="space-y-6">
+                            <h3 className="text-xl font-semibold text-white border-b border-white/10 pb-2">Registration Rules</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <InputField type="date" label="Deadline Date" name="registration_deadline_date" value={formData.registration_deadline_date} onChange={handleChange} required />
+                                <InputField type="time" label="Deadline Time" name="registration_deadline_time" value={formData.registration_deadline_time} onChange={handleChange} required />
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <SelectField label="Participation Type" name="team_size" value={formData.team_size} onChange={handleChange} options={['individual', 'team']} />
+                                <SelectField label="Initial Status" name="status" value={formData.status} onChange={handleChange} options={['open', 'closed']} />
                             </div>
                         </div>
 
-                        {/* Venue */}
-                        <div>
-                            <label className="label">
-                                Venue <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                name="venue"
-                                value={formData.venue}
-                                onChange={handleChange}
-                                className={`input-field ${errors.venue ? 'border-red-500' : ''}`}
-                                placeholder="e.g., Main Sports Ground, Indoor Stadium"
-                            />
-                            {errors.venue && <p className="text-red-500 text-sm mt-1">{errors.venue}</p>}
-                        </div>
-
-                        {/* Registration Deadline */}
-                        <div className="grid md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="label">
-                                    Registration Deadline Date <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="date"
-                                    name="registration_deadline_date"
-                                    value={formData.registration_deadline_date}
-                                    onChange={handleChange}
-                                    className={`input-field ${errors.registration_deadline_date ? 'border-red-500' : ''}`}
-                                />
-                                {errors.registration_deadline_date && (
-                                    <p className="text-red-500 text-sm mt-1">{errors.registration_deadline_date}</p>
-                                )}
-                            </div>
-                            <div>
-                                <label className="label">
-                                    Registration Deadline Time <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="time"
-                                    name="registration_deadline_time"
-                                    value={formData.registration_deadline_time}
-                                    onChange={handleChange}
-                                    className={`input-field ${errors.registration_deadline_time ? 'border-red-500' : ''}`}
-                                />
-                                {errors.registration_deadline_time && (
-                                    <p className="text-red-500 text-sm mt-1">{errors.registration_deadline_time}</p>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Team Size */}
-                        <div>
-                            <label className="label">
-                                Team Size <span className="text-red-500">*</span>
-                            </label>
-                            <select
-                                name="team_size"
-                                value={formData.team_size}
-                                onChange={handleChange}
-                                className="input-field"
-                            >
-                                <option value="individual">Individual</option>
-                                <option value="team">Team</option>
-                            </select>
-                        </div>
-
-                        {/* Status */}
-                        <div>
-                            <label className="label">
-                                Status <span className="text-red-500">*</span>
-                            </label>
-                            <select
-                                name="status"
-                                value={formData.status}
-                                onChange={handleChange}
-                                className="input-field"
-                            >
-                                <option value="open">Open</option>
-                                <option value="closed">Closed</option>
-                            </select>
-                        </div>
-
-                        {/* Submit Buttons */}
-                        <div className="flex gap-4 pt-4">
-                            <button
-                                type="button"
-                                onClick={() => navigate('/admin')}
-                                className="btn-secondary flex-1"
-                                disabled={submitting}
-                            >
+                        {/* Submit */}
+                        <div className="pt-6 border-t border-white/10 flex justify-end gap-4">
+                            <button type="button" onClick={() => navigate('/admin')} className="px-6 py-3 rounded-xl hover:bg-white/5 text-gray-300 transition-colors">
                                 Cancel
                             </button>
-                            <button type="submit" className="btn-primary flex-1" disabled={submitting}>
-                                {submitting ? 'Creating...' : 'Create Tournament'}
+                            <button
+                                type="submit"
+                                disabled={submitting}
+                                className="btn-primary px-8 py-3 text-lg shadow-lg shadow-indigo-500/20"
+                            >
+                                {submitting ? 'Creating...' : 'Launch Tournament'}
                             </button>
                         </div>
+
                     </form>
                 </div>
             </div>
         </div>
     );
 };
+
+// Reusing helper components (should ideally be in a shared UI file)
+const InputField = ({ label, ...props }: any) => (
+    <div className="space-y-2">
+        <label className="text-sm font-medium text-gray-400 ml-1">{label}</label>
+        <input className="w-full bg-gray-900/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all placeholder-gray-600" {...props} />
+    </div>
+);
+
+const TextAreaField = ({ label, ...props }: any) => (
+    <div className="space-y-2">
+        <label className="text-sm font-medium text-gray-400 ml-1">{label}</label>
+        <textarea className="w-full bg-gray-900/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all placeholder-gray-600 resize-none" {...props} />
+    </div>
+);
+
+const SelectField = ({ label, options, ...props }: any) => (
+    <div className="space-y-2">
+        <label className="text-sm font-medium text-gray-400 ml-1">{label}</label>
+        <div className="relative">
+            <select className="w-full bg-gray-900/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all appearance-none cursor-pointer capitalize" {...props}>
+                {options.map((opt: string) => <option key={opt} value={opt} className="bg-gray-900 text-white capitalize">{opt}</option>)}
+            </select>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+            </div>
+        </div>
+    </div>
+);
 
 export default CreateTournament;

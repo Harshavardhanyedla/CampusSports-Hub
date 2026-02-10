@@ -6,10 +6,7 @@ const Register = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [tournament, setTournament] = useState<Tournament | null>(null);
-    const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
-    const [success, setSuccess] = useState(false);
-
     const [formData, setFormData] = useState({
         student_name: '',
         email: '',
@@ -18,49 +15,23 @@ const Register = () => {
         year: '',
         phone: '',
     });
-
     const [errors, setErrors] = useState<Record<string, string>>({});
 
     useEffect(() => {
-        if (id) {
-            fetchTournament();
-        }
+        if (id) fetchTournament();
     }, [id]);
 
     const fetchTournament = async () => {
-        try {
-            const { data, error } = await supabase
-                .from('tournaments')
-                .select('*')
-                .eq('id', id)
-                .single();
-
-            if (error) throw error;
-            setTournament(data);
-        } catch (error) {
-            console.error('Error fetching tournament:', error);
-        } finally {
-            setLoading(false);
-        }
+        const { data } = await supabase.from('tournaments').select('*').eq('id', id).single();
+        setTournament(data);
     };
 
     const validateForm = () => {
         const newErrors: Record<string, string> = {};
-
-        if (!formData.student_name.trim()) newErrors.student_name = 'Name is required';
-        if (!formData.email.trim()) {
-            newErrors.email = 'Email is required';
-        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-            newErrors.email = 'Email is invalid';
-        }
+        if (!formData.student_name.trim()) newErrors.student_name = 'Full Name is required';
+        if (!formData.email.trim() || !/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Valid Email is required';
         if (!formData.college_id.trim()) newErrors.college_id = 'College ID is required';
-        if (!formData.department.trim()) newErrors.department = 'Department is required';
-        if (!formData.year) newErrors.year = 'Year is required';
-        if (!formData.phone.trim()) {
-            newErrors.phone = 'Phone number is required';
-        } else if (!/^\d{10}$/.test(formData.phone.replace(/\D/g, ''))) {
-            newErrors.phone = 'Phone number must be 10 digits';
-        }
+        if (!formData.phone.trim() || !/^\d{10}$/.test(formData.phone)) newErrors.phone = 'Valid 10-digit Phone is required';
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -68,236 +39,169 @@ const Register = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
         if (!validateForm()) return;
 
         setSubmitting(true);
-
         try {
-            const { error } = await supabase.from('registrations').insert([
-                {
-                    tournament_id: id,
-                    ...formData,
-                },
-            ]);
+            const { error } = await supabase.from('registrations').insert({
+                tournament_id: id,
+                ...formData,
+            });
 
             if (error) throw error;
 
-            setSuccess(true);
-            setTimeout(() => {
-                navigate('/my-registrations');
-            }, 2000);
-        } catch (error) {
-            console.error('Error submitting registration:', error);
-            alert('Failed to submit registration. Please try again.');
+            navigate('/my-registrations');
+        } catch (error: any) {
+            console.error('Error:', error);
+            alert('Registration failed: ' + error.message);
         } finally {
             setSubmitting(false);
         }
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value,
-        });
-        // Clear error when user starts typing
-        if (errors[e.target.name]) {
-            setErrors({
-                ...errors,
-                [e.target.name]: '',
-            });
-        }
+        setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    if (loading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-            </div>
-        );
-    }
-
-    if (!tournament) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="card text-center">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-4">Tournament not found</h2>
-                </div>
-            </div>
-        );
-    }
-
-    const isExpired = new Date(tournament.registration_deadline) < new Date();
-    const isClosed = tournament.status === 'closed';
-
-    if (isClosed || isExpired) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="card text-center max-w-md">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-4">Registration Closed</h2>
-                    <p className="text-gray-600 mb-6">
-                        Registration for this tournament is no longer available.
-                    </p>
-                    <button onClick={() => navigate('/')} className="btn-primary">
-                        View Other Tournaments
-                    </button>
-                </div>
-            </div>
-        );
-    }
-
-    if (success) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="card text-center max-w-md">
-                    <div className="bg-green-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
-                        <svg className="w-12 h-12 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                    </div>
-                    <h2 className="text-3xl font-bold text-gray-900 mb-4">Registration Successful!</h2>
-                    <p className="text-gray-600 mb-6">
-                        You have successfully registered for <strong>{tournament.title}</strong>
-                    </p>
-                    <p className="text-sm text-gray-500">Redirecting to your registrations...</p>
-                </div>
-            </div>
-        );
-    }
+    if (!tournament) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div></div>;
 
     return (
-        <div className="min-h-screen py-12">
-            <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="card">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Tournament Registration</h1>
-                    <p className="text-gray-600 mb-6">{tournament.title}</p>
+        <div className="min-h-screen container-custom py-12 flex flex-col items-center justify-center">
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* Student Name */}
-                        <div>
-                            <label className="label">
-                                Full Name <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="text"
+            <div className="w-full max-w-2xl">
+                <div className="text-center mb-10 space-y-2">
+                    <h1 className="text-4xl font-bold text-white">Secure Your Spot</h1>
+                    <p className="text-gray-400">Registering for <span className="text-indigo-400 font-medium">{tournament.title}</span></p>
+                </div>
+
+                <div className="glass-panel p-8 md:p-10 rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-600/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2" />
+
+                    <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <InputField
+                                label="Full Name"
                                 name="student_name"
                                 value={formData.student_name}
                                 onChange={handleChange}
-                                className={`input-field ${errors.student_name ? 'border-red-500' : ''}`}
-                                placeholder="Enter your full name"
+                                error={errors.student_name}
+                                placeholder="John Doe"
                             />
-                            {errors.student_name && (
-                                <p className="text-red-500 text-sm mt-1">{errors.student_name}</p>
-                            )}
-                        </div>
-
-                        {/* Email */}
-                        <div>
-                            <label className="label">
-                                Email Address <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="email"
+                            <InputField
+                                label="College Email"
                                 name="email"
+                                type="email"
                                 value={formData.email}
                                 onChange={handleChange}
-                                className={`input-field ${errors.email ? 'border-red-500' : ''}`}
-                                placeholder="your.email@college.edu"
+                                error={errors.email}
+                                placeholder="john@college.edu"
                             />
-                            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
                         </div>
 
-                        {/* College ID */}
-                        <div>
-                            <label className="label">
-                                College ID <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="text"
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <InputField
+                                label="College ID / Roll No."
                                 name="college_id"
                                 value={formData.college_id}
                                 onChange={handleChange}
-                                className={`input-field ${errors.college_id ? 'border-red-500' : ''}`}
-                                placeholder="e.g., STU2026001"
+                                error={errors.college_id}
+                                placeholder="2023CS101"
                             />
-                            {errors.college_id && (
-                                <p className="text-red-500 text-sm mt-1">{errors.college_id}</p>
-                            )}
-                        </div>
-
-                        {/* Department */}
-                        <div>
-                            <label className="label">
-                                Department <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                name="department"
-                                value={formData.department}
-                                onChange={handleChange}
-                                className={`input-field ${errors.department ? 'border-red-500' : ''}`}
-                                placeholder="e.g., Computer Science"
-                            />
-                            {errors.department && (
-                                <p className="text-red-500 text-sm mt-1">{errors.department}</p>
-                            )}
-                        </div>
-
-                        {/* Year */}
-                        <div>
-                            <label className="label">
-                                Year <span className="text-red-500">*</span>
-                            </label>
-                            <select
-                                name="year"
-                                value={formData.year}
-                                onChange={handleChange}
-                                className={`input-field ${errors.year ? 'border-red-500' : ''}`}
-                            >
-                                <option value="">Select year</option>
-                                <option value="1st Year">1st Year</option>
-                                <option value="2nd Year">2nd Year</option>
-                                <option value="3rd Year">3rd Year</option>
-                                <option value="4th Year">4th Year</option>
-                            </select>
-                            {errors.year && <p className="text-red-500 text-sm mt-1">{errors.year}</p>}
-                        </div>
-
-                        {/* Phone */}
-                        <div>
-                            <label className="label">
-                                Phone Number <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="tel"
+                            <InputField
+                                label="Phone Number"
                                 name="phone"
                                 value={formData.phone}
                                 onChange={handleChange}
-                                className={`input-field ${errors.phone ? 'border-red-500' : ''}`}
-                                placeholder="10-digit phone number"
+                                error={errors.phone}
+                                placeholder="9876543210"
                             />
-                            {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
                         </div>
 
-                        {/* Submit Button */}
-                        <div className="flex gap-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <SelectField
+                                label="Department"
+                                name="department"
+                                value={formData.department}
+                                onChange={handleChange}
+                                options={['CSE', 'ECE', 'MECH', 'CIVIL', 'IT', 'AI&DS', 'MBA', 'Other']}
+                            />
+                            <SelectField
+                                label="Year of Study"
+                                name="year"
+                                value={formData.year}
+                                onChange={handleChange}
+                                options={['1st Year', '2nd Year', '3rd Year', '4th Year', 'PG']}
+                            />
+                        </div>
+
+                        <div className="pt-6">
                             <button
-                                type="button"
-                                onClick={() => navigate(-1)}
-                                className="btn-secondary flex-1"
+                                type="submit"
                                 disabled={submitting}
+                                className={`w-full btn-primary py-4 text-lg font-bold shadow-lg shadow-indigo-500/20 group relative overflow-hidden ${submitting ? 'opacity-70 cursor-wait' : ''}`}
                             >
-                                Cancel
-                            </button>
-                            <button type="submit" className="btn-primary flex-1" disabled={submitting}>
-                                {submitting ? 'Submitting...' : 'Register'}
+                                <span className={`relative z-10 flex items-center justify-center gap-2 ${submitting ? 'invisible' : ''}`}>
+                                    Confirm Registration
+                                    <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                    </svg>
+                                </span>
+                                {submitting && (
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent" />
+                                    </div>
+                                )}
                             </button>
                         </div>
+
                     </form>
                 </div>
             </div>
         </div>
     );
 };
+
+// Helper Components
+interface FieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
+    label: string;
+    error?: string;
+}
+
+const InputField = ({ label, error, ...props }: FieldProps) => (
+    <div className="space-y-2">
+        <label className="text-sm font-medium text-gray-400 ml-1">{label}</label>
+        <input
+            className={`w-full bg-gray-900/50 border ${error ? 'border-red-500/50' : 'border-white/10'} rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all placeholder-gray-600`}
+            {...props}
+        />
+        {error && <p className="text-xs text-red-400 ml-1">{error}</p>}
+    </div>
+);
+
+interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+    label: string;
+    options: string[];
+}
+
+const SelectField = ({ label, options, ...props }: SelectProps) => (
+    <div className="space-y-2">
+        <label className="text-sm font-medium text-gray-400 ml-1">{label}</label>
+        <div className="relative">
+            <select
+                className="w-full bg-gray-900/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all appearance-none cursor-pointer"
+                {...props}
+            >
+                <option value="" disabled selected>Select {label}</option>
+                {options.map((opt) => <option key={opt} value={opt} className="bg-gray-900 text-white">{opt}</option>)}
+            </select>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+            </div>
+        </div>
+    </div>
+);
 
 export default Register;

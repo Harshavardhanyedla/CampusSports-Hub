@@ -61,94 +61,69 @@ const AdminDashboard = () => {
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen py-12">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                {/* Header */}
-                <div className="mb-8">
-                    <h1 className="text-4xl font-bold text-white mb-4 drop-shadow-lg">Admin Dashboard</h1>
-                    <p className="text-xl text-white/90">Manage tournaments and view registrations</p>
+        <div className="min-h-screen container-custom py-12">
+
+            {/* Header */}
+            <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+                <div>
+                    <h1 className="text-4xl font-bold text-white mb-2">Admin Dashboard</h1>
+                    <p className="text-gray-400">Manage your tournaments and player data.</p>
                 </div>
+                <Link to="/admin/create" className="btn-primary shadow-lg shadow-indigo-500/30">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    Create New Tournament
+                </Link>
+            </header>
 
-                {/* Stats Cards */}
-                <div className="grid md:grid-cols-3 gap-6 mb-8">
-                    <div className="card bg-gradient-to-br from-primary-500 to-primary-700 text-white">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-primary-100 text-sm font-medium">Total Tournaments</p>
-                                <p className="text-4xl font-bold mt-2">{stats.total}</p>
-                            </div>
-                            <svg className="w-16 h-16 text-primary-200" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
-                                <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
-                            </svg>
-                        </div>
-                    </div>
+            {/* Stats Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <StatCard
+                    title="Total Tournaments"
+                    value={stats.total}
+                    icon={<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />}
+                    color="indigo"
+                />
+                <StatCard
+                    title="Active / Open"
+                    value={stats.open}
+                    icon={<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />}
+                    color="emerald"
+                />
+                <StatCard
+                    title="Closed / Past"
+                    value={stats.closed}
+                    icon={<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />}
+                    color="gray" // Changed to gray for closed
+                />
+            </div>
 
-                    <div className="card bg-gradient-to-br from-green-500 to-green-700 text-white">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-green-100 text-sm font-medium">Open for Registration</p>
-                                <p className="text-4xl font-bold mt-2">{stats.open}</p>
-                            </div>
-                            <svg className="w-16 h-16 text-green-200" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                            </svg>
-                        </div>
-                    </div>
+            {/* Content Area */}
+            <div className="glass-panel rounded-3xl p-8 border border-white/5">
+                <h2 className="text-2xl font-bold text-white mb-8 border-b border-white/10 pb-4">All Tournaments</h2>
 
-                    <div className="card bg-gradient-to-br from-red-500 to-red-700 text-white">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-red-100 text-sm font-medium">Closed Tournaments</p>
-                                <p className="text-4xl font-bold mt-2">{stats.closed}</p>
-                            </div>
-                            <svg className="w-16 h-16 text-red-200" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Create Button */}
-                <div className="mb-8">
-                    <Link to="/admin/create" className="btn-primary inline-flex items-center text-lg">
-                        <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                        Create New Tournament
-                    </Link>
-                </div>
-
-                {/* Tournaments List */}
                 {tournaments.length === 0 ? (
-                    <div className="card text-center py-12">
-                        <svg
-                            className="w-24 h-24 mx-auto text-gray-400 mb-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-                            />
-                        </svg>
-                        <h3 className="text-xl font-semibold text-gray-900 mb-2">No tournaments yet</h3>
-                        <p className="text-gray-600 mb-6">Get started by creating your first tournament</p>
-                        <Link to="/admin/create" className="btn-primary inline-block">
+                    <div className="text-center py-20">
+                        <div className="w-20 h-20 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg className="w-10 h-10 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                            </svg>
+                        </div>
+                        <h3 className="text-xl font-medium text-white mb-2">No tournaments found</h3>
+                        <p className="text-gray-400 mb-6">Get started by creating your first tournament.</p>
+                        <Link to="/admin/create" className="btn-primary inline-flex">
                             Create Tournament
                         </Link>
                     </div>
                 ) : (
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {tournaments.map((tournament) => (
                             <TournamentCard
                                 key={tournament.id}
@@ -164,5 +139,24 @@ const AdminDashboard = () => {
         </div>
     );
 };
+
+// Helper Stat Card
+const StatCard = ({ title, value, icon, color }: { title: string, value: number, icon: React.ReactNode, color: string }) => (
+    <div className={`p-6 rounded-2xl glass-panel relative overflow-hidden group`}>
+        <div className={`absolute top-0 right-0 w-24 h-24 bg-${color}-500/10 rounded-full blur-2xl transform translate-x-10 -translate-y-10`} />
+
+        <div className="flex items-center justify-between relative z-10">
+            <div>
+                <p className="text-sm font-medium text-gray-400 mb-1 uppercase tracking-wider">{title}</p>
+                <p className="text-3xl font-bold text-white">{value}</p>
+            </div>
+            <div className={`p-3 rounded-xl bg-${color}-500/20 text-${color}-400`}>
+                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    {icon}
+                </svg>
+            </div>
+        </div>
+    </div>
+);
 
 export default AdminDashboard;
