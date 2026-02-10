@@ -105,9 +105,9 @@ const Navbar = () => {
 
             {/* Mobile Menu Overlay */}
             <div
-                className={`md:hidden fixed inset-0 bg-gray-900/95 backdrop-blur-xl z-40 transition-transform duration-300 ease-in-out ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+                className={`md:hidden fixed inset-0 bg-gray-900/98 z-40 transition-transform duration-300 ease-in-out ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
                     }`}
-                style={{ top: '0', paddingTop: '80px' }}
+                style={{ top: '0', paddingTop: '80px', transform: 'translateZ(0)' }}
             >
                 <div className="flex flex-col items-center gap-8 p-8">
                     {isAdminPath && isAdminAuth ? (

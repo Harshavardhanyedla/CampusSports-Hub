@@ -58,10 +58,19 @@ body {
   min-height: 100vh;
   background-color: var(--color-dark-bg);
   background-image:
-    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.15) 0px, transparent 50%);
+    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.1) 0px, transparent 40%),
+    radial-gradient(at 100% 0%, rgba(236, 72, 153, 0.1) 0px, transparent 40%);
   color: var(--color-dark-text);
   overflow-x: hidden;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Hardware acceleration for scrolling */
+* {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 /* --- Glassmorphism Utilities --- */
@@ -77,6 +86,20 @@ body {
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.05);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  transform: translateZ(0);
+  /* Hardware acceleration */
+}
+
+/* Reduced blur for mobile to fix scroll lag */
+@media (max-width: 768px) {
+
+  .glass,
+  .glass-panel,
+  .btn-glass,
+  .card-modern {
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+  }
 }
 
 /* --- Modern Components --- */
@@ -132,11 +155,15 @@ body {
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
   border-radius: 1rem;
   overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+  will-change: transform;
+  content-visibility: auto;
+  /* Optimizes long lists */
+  contain-intrinsic-size: 0 400px;
 }
 
 .card-modern:hover {
-  transform: translateY(-4px);
+  transform: translateY(-4px) translateZ(0);
   border-color: rgba(99, 102, 241, 0.3);
   box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.4);
 }
