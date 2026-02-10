@@ -37,7 +37,7 @@ const Navbar = () => {
 
     return (
         <nav
-            className={`absolute top-0 left-0 right-0 z-[70] transition-all duration-300 ${(scrolled || mobileMenuOpen) ? 'bg-black/20 backdrop-blur-md py-3' : 'bg-transparent py-5'
+            className={`${mobileMenuOpen ? 'fixed' : 'absolute'} top-0 left-0 right-0 z-[100] transition-all duration-300 ${(scrolled || mobileMenuOpen) ? 'bg-black/20 backdrop-blur-md py-3' : 'bg-transparent py-5'
                 }`}
         >
             <div className="container-custom flex items-center justify-between">
@@ -91,7 +91,7 @@ const Navbar = () => {
                 {/* Mobile Menu Button */}
                 <button
                     onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                    className="md:hidden p-2 text-gray-300 hover:text-white transition-colors"
+                    className="md:hidden p-2 text-gray-300 hover:text-white transition-colors relative z-[110]"
                 >
                     <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         {mobileMenuOpen ? (
@@ -105,7 +105,7 @@ const Navbar = () => {
 
             {/* Mobile Menu Overlay */}
             <div
-                className={`md:hidden fixed inset-0 bg-[#020617] z-[60] transition-transform duration-300 ease-in-out ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+                className={`md:hidden fixed inset-0 bg-[#020617] bg-opacity-100 z-[90] transition-transform duration-300 ease-in-out ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
                     }`}
                 style={{ top: '0', paddingTop: '100px' }}
             >
