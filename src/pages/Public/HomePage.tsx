@@ -50,7 +50,7 @@ const HomePage = () => {
     const sports = ['All', ...new Set(tournaments.map(t => t.sport))];
 
     return (
-        <div className="min-h-screen pt-20 pb-12">
+        <div className="min-h-screen pt-24 md:pt-32 pb-12">
 
             {/* Hero Section */}
             <section className="relative container-custom mb-16 overflow-hidden sm:pt-16">
@@ -98,15 +98,15 @@ const HomePage = () => {
             <div id="tournaments-grid" className="container-custom">
 
                 {/* Controls Bar */}
-                <div className="flex flex-col lg:flex-row items-center justify-between gap-6 mb-12 glass-panel p-4 rounded-3xl sticky top-24 z-30">
+                <div className="flex flex-col lg:flex-row items-center justify-between gap-6 mb-16 glass-panel p-4 rounded-3xl md:sticky md:top-24 z-30">
 
                     {/* Tabs */}
                     <div className="flex p-1 bg-gray-900/50 rounded-xl">
                         <button
                             onClick={() => setActiveTab('open')}
                             className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'open'
-                                    ? 'bg-indigo-600 text-white shadow-lg'
-                                    : 'text-gray-400 hover:text-white'
+                                ? 'bg-indigo-600 text-white shadow-lg'
+                                : 'text-gray-400 hover:text-white'
                                 }`}
                         >
                             Open Now
@@ -114,8 +114,8 @@ const HomePage = () => {
                         <button
                             onClick={() => setActiveTab('closed')}
                             className={`px-6 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'closed'
-                                    ? 'bg-indigo-600 text-white shadow-lg'
-                                    : 'text-gray-400 hover:text-white'
+                                ? 'bg-indigo-600 text-white shadow-lg'
+                                : 'text-gray-400 hover:text-white'
                                 }`}
                         >
                             Past / Closed
@@ -144,8 +144,8 @@ const HomePage = () => {
                             key={sport}
                             onClick={() => setSelectedSport(sport)}
                             className={`px-5 py-2 rounded-full text-sm font-medium border transition-all duration-300 transform hover:scale-105 ${selectedSport === sport
-                                    ? 'bg-white text-gray-900 border-white shadow-[0_0_20px_rgba(255,255,255,0.3)]'
-                                    : 'bg-transparent text-gray-400 border-white/10 hover:border-white/30 hover:text-white'
+                                ? 'bg-white text-gray-900 border-white shadow-[0_0_20px_rgba(255,255,255,0.3)]'
+                                : 'bg-transparent text-gray-400 border-white/10 hover:border-white/30 hover:text-white'
                                 }`}
                         >
                             {sport}

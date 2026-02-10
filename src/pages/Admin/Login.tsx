@@ -50,7 +50,7 @@ const AdminLogin = () => {
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                                 className="w-full bg-gray-900/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all placeholder-gray-600"
-                                placeholder="bvricesports2026"
+                                placeholder="Enter admin username"
                                 required
                             />
                         </div>
@@ -62,7 +62,7 @@ const AdminLogin = () => {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 className="w-full bg-gray-900/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all placeholder-gray-600"
-                                placeholder="••••••••••••"
+                                placeholder="Enter admin password"
                                 required
                             />
                         </div>
