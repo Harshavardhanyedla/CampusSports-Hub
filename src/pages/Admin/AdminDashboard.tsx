@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase, type Tournament } from '../../services/supabaseClient';
 import TournamentCard from '../../components/TournamentCard';
+import CustomModal from '../../components/Modal';
 
 const AdminDashboard = () => {
     const [tournaments, setTournaments] = useState<Tournament[]>([]);
@@ -10,6 +11,20 @@ const AdminDashboard = () => {
         total: 0,
         open: 0,
         closed: 0,
+    });
+
+    // Modal state
+    const [modalConfig, setModalConfig] = useState<{
+        isOpen: boolean;
+        title: string;
+        message: string;
+        type: 'alert' | 'confirm';
+        onConfirm?: () => void;
+    }>({
+        isOpen: false,
+        title: '',
+        message: '',
+        type: 'alert'
     });
 
     useEffect(() => {
@@ -27,7 +42,6 @@ const AdminDashboard = () => {
 
             setTournaments(data || []);
 
-            // Calculate stats
             const total = data?.length || 0;
             const open = data?.filter(t => t.status === 'open' && new Date(t.registration_deadline) > new Date()).length || 0;
             const closed = total - open;
@@ -40,21 +54,37 @@ const AdminDashboard = () => {
         }
     };
 
-    const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this tournament? This will also delete all registrations.')) {
-            return;
-        }
+    const confirmDelete = (id: string) => {
+        setModalConfig({
+            isOpen: true,
+            title: 'Delete Tournament',
+            message: 'Are you sure you want to delete this tournament? This will also permanently delete all associated registrations.',
+            type: 'confirm',
+            onConfirm: () => handleDelete(id)
+        });
+    };
 
+    const handleDelete = async (id: string) => {
         try {
             const { error } = await supabase.from('tournaments').delete().eq('id', id);
 
             if (error) throw error;
 
-            alert('Tournament deleted successfully');
+            setModalConfig({
+                isOpen: true,
+                title: 'Success!',
+                message: 'Tournament deleted successfully.',
+                type: 'alert'
+            });
             fetchTournaments();
         } catch (error) {
             console.error('Error deleting tournament:', error);
-            alert('Failed to delete tournament');
+            setModalConfig({
+                isOpen: true,
+                title: 'Error',
+                message: 'Failed to delete tournament. Please try again.',
+                type: 'alert'
+            });
         }
     };
 
@@ -68,6 +98,15 @@ const AdminDashboard = () => {
 
     return (
         <div className="min-h-screen container-custom py-12">
+
+            <CustomModal
+                isOpen={modalConfig.isOpen}
+                onClose={() => setModalConfig(prev => ({ ...prev, isOpen: false }))}
+                onConfirm={modalConfig.onConfirm}
+                title={modalConfig.title}
+                message={modalConfig.message}
+                type={modalConfig.type}
+            />
 
             {/* Header */}
             <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
@@ -101,7 +140,7 @@ const AdminDashboard = () => {
                     title="Closed / Past"
                     value={stats.closed}
                     icon={<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />}
-                    color="gray" // Changed to gray for closed
+                    color="gray"
                 />
             </div>
 
@@ -130,7 +169,7 @@ const AdminDashboard = () => {
                                 tournament={tournament}
                                 showActions
                                 onEdit={() => window.location.href = `/admin/edit/${tournament.id}`}
-                                onDelete={() => handleDelete(tournament.id)}
+                                onDelete={() => confirmDelete(tournament.id)}
                             />
                         ))}
                     </div>
@@ -140,7 +179,6 @@ const AdminDashboard = () => {
     );
 };
 
-// Helper Stat Card
 const StatCard = ({ title, value, icon, color }: { title: string, value: number, icon: React.ReactNode, color: string }) => (
     <div className={`p-6 rounded-2xl glass-panel relative overflow-hidden group`}>
         <div className={`absolute top-0 right-0 w-24 h-24 bg-${color}-500/10 rounded-full blur-2xl transform translate-x-10 -translate-y-10`} />

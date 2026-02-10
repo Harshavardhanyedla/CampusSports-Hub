@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase, type Tournament } from '../../services/supabaseClient';
+import { useModal } from '../../context/ModalContext';
 
 const Register = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { showAlert } = useModal();
     const [tournament, setTournament] = useState<Tournament | null>(null);
     const [submitting, setSubmitting] = useState(false);
     const [formData, setFormData] = useState({
@@ -50,10 +52,11 @@ const Register = () => {
 
             if (error) throw error;
 
-            navigate('/my-registrations');
+            // Redirect to my-registrations and pass the email so it loads instantly
+            navigate('/my-registrations', { state: { email: formData.email } });
         } catch (error: any) {
             console.error('Error:', error);
-            alert('Registration failed: ' + error.message);
+            showAlert('Registration Failed', error.message || 'Something went wrong. Please try again.');
         } finally {
             setSubmitting(false);
         }
@@ -192,7 +195,7 @@ const SelectField = ({ label, options, ...props }: SelectProps) => (
                 className="w-full bg-gray-900/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all appearance-none cursor-pointer"
                 {...props}
             >
-                <option value="" disabled selected>Select {label}</option>
+                <option value="" disabled>Select {label}</option>
                 {options.map((opt) => <option key={opt} value={opt} className="bg-gray-900 text-white">{opt}</option>)}
             </select>
             <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">

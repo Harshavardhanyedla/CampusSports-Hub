@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../services/supabaseClient';
+import { useModal } from '../../context/ModalContext';
 
 const EditTournament = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { showAlert } = useModal();
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
 
@@ -24,9 +26,7 @@ const EditTournament = () => {
     const [errors, setErrors] = useState<Record<string, string>>({});
 
     useEffect(() => {
-        if (id) {
-            fetchTournament();
-        }
+        if (id) fetchTournament();
     }, [id]);
 
     const fetchTournament = async () => {
@@ -39,25 +39,24 @@ const EditTournament = () => {
 
             if (error) throw error;
 
-            // Parse date/time
-            const tournamentDate = new Date(data.date);
-            const deadlineDate = new Date(data.registration_deadline);
+            const tDate = new Date(data.date);
+            const dDate = new Date(data.registration_deadline);
 
             setFormData({
                 title: data.title,
                 sport: data.sport,
                 description: data.description,
-                date: tournamentDate.toISOString().split('T')[0],
-                time: tournamentDate.toTimeString().slice(0, 5),
+                date: tDate.toISOString().split('T')[0],
+                time: tDate.toTimeString().slice(0, 5),
                 venue: data.venue,
-                registration_deadline_date: deadlineDate.toISOString().split('T')[0],
-                registration_deadline_time: deadlineDate.toTimeString().slice(0, 5),
+                registration_deadline_date: dDate.toISOString().split('T')[0],
+                registration_deadline_time: dDate.toTimeString().slice(0, 5),
                 team_size: data.team_size,
                 status: data.status,
             });
         } catch (error) {
-            console.error('Error fetching tournament:', error);
-            alert('Tournament not found');
+            console.error('Error:', error);
+            showAlert('Error', 'Tournament not found');
             navigate('/admin');
         } finally {
             setLoading(false);
@@ -66,24 +65,12 @@ const EditTournament = () => {
 
     const validateForm = () => {
         const newErrors: Record<string, string> = {};
-
-        if (!formData.title.trim()) newErrors.title = 'Tournament title is required';
+        if (!formData.title.trim()) newErrors.title = 'Title is required';
         if (!formData.sport.trim()) newErrors.sport = 'Sport is required';
         if (!formData.description.trim()) newErrors.description = 'Description is required';
-        if (!formData.date) newErrors.date = 'Tournament date is required';
-        if (!formData.time) newErrors.time = 'Tournament time is required';
+        if (!formData.date || !formData.time) newErrors.date = 'Date and Time are required';
         if (!formData.venue.trim()) newErrors.venue = 'Venue is required';
-        if (!formData.registration_deadline_date) newErrors.registration_deadline_date = 'Registration deadline date is required';
-        if (!formData.registration_deadline_time) newErrors.registration_deadline_time = 'Registration deadline time is required';
-
-        if (formData.date && formData.registration_deadline_date) {
-            const tournamentDate = new Date(`${formData.date}T${formData.time || '00:00'}`);
-            const deadlineDate = new Date(`${formData.registration_deadline_date}T${formData.registration_deadline_time || '00:00'}`);
-
-            if (deadlineDate >= tournamentDate) {
-                newErrors.registration_deadline_date = 'Registration deadline must be before tournament date';
-            }
-        }
+        if (!formData.registration_deadline_date || !formData.registration_deadline_time) newErrors.registration_deadline_date = 'Deadline is required';
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -91,11 +78,9 @@ const EditTournament = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
         if (!validateForm()) return;
 
         setSubmitting(true);
-
         try {
             const tournamentDateTime = `${formData.date}T${formData.time}`;
             const deadlineDateTime = `${formData.registration_deadline_date}T${formData.registration_deadline_time}`;
@@ -116,216 +101,69 @@ const EditTournament = () => {
 
             if (error) throw error;
 
-            alert('Tournament updated successfully!');
+            showAlert('Success', 'Tournament updated successfully!');
             navigate('/admin');
-        } catch (error) {
-            console.error('Error updating tournament:', error);
-            alert('Failed to update tournament. Please try again.');
+        } catch (error: any) {
+            console.error('Error:', error);
+            showAlert('Error', 'Failed to update tournament: ' + error.message);
         } finally {
             setSubmitting(false);
         }
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value,
-        });
-        if (errors[e.target.name]) {
-            setErrors({
-                ...errors,
-                [e.target.name]: '',
-            });
-        }
+        setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    if (loading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-            </div>
-        );
-    }
+    if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-indigo-500"></div></div>;
 
     return (
-        <div className="min-h-screen py-12">
-            <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="card">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-6">Edit Tournament</h1>
+        <div className="min-h-screen container-custom py-12 flex flex-col items-center justify-center">
+            <div className="w-full max-w-4xl">
+                <div className="flex items-center justify-between mb-8">
+                    <h1 className="text-3xl font-bold text-white">Edit Tournament</h1>
+                    <button onClick={() => navigate('/admin')} className="text-gray-400 hover:text-white transition-colors">Cancel</button>
+                </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* Tournament Title */}
-                        <div>
-                            <label className="label">
-                                Tournament Title <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                name="title"
-                                value={formData.title}
-                                onChange={handleChange}
-                                className={`input-field ${errors.title ? 'border-red-500' : ''}`}
-                                placeholder="e.g., Inter-College Cricket Championship 2026"
-                            />
-                            {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
-                        </div>
-
-                        {/* Sport */}
-                        <div>
-                            <label className="label">
-                                Sport <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                name="sport"
-                                value={formData.sport}
-                                onChange={handleChange}
-                                className={`input-field ${errors.sport ? 'border-red-500' : ''}`}
-                                placeholder="e.g., Cricket, Basketball, Football"
-                            />
-                            {errors.sport && <p className="text-red-500 text-sm mt-1">{errors.sport}</p>}
-                        </div>
-
-                        {/* Description */}
-                        <div>
-                            <label className="label">
-                                Description <span className="text-red-500">*</span>
-                            </label>
-                            <textarea
-                                name="description"
-                                value={formData.description}
-                                onChange={handleChange}
-                                rows={4}
-                                className={`input-field ${errors.description ? 'border-red-500' : ''}`}
-                                placeholder="Describe the tournament, rules, format, prizes, etc."
-                            />
-                            {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
-                        </div>
-
-                        {/* Date and Time */}
-                        <div className="grid md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="label">
-                                    Tournament Date <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="date"
-                                    name="date"
-                                    value={formData.date}
-                                    onChange={handleChange}
-                                    className={`input-field ${errors.date ? 'border-red-500' : ''}`}
-                                />
-                                {errors.date && <p className="text-red-500 text-sm mt-1">{errors.date}</p>}
+                <div className="glass-panel p-8 md:p-10 rounded-3xl border border-white/5 relative overflow-hidden">
+                    <form onSubmit={handleSubmit} className="space-y-8 relative z-10">
+                        {/* Section 1: Basic Info */}
+                        <div className="space-y-6">
+                            <h3 className="text-xl font-semibold text-white border-b border-white/10 pb-2">Basic Info</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <InputField label="Tournament Title" name="title" value={formData.title} onChange={handleChange} error={errors.title} required />
+                                <InputField label="Sport" name="sport" value={formData.sport} onChange={handleChange} error={errors.sport} required />
                             </div>
-                            <div>
-                                <label className="label">
-                                    Tournament Time <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="time"
-                                    name="time"
-                                    value={formData.time}
-                                    onChange={handleChange}
-                                    className={`input-field ${errors.time ? 'border-red-500' : ''}`}
-                                />
-                                {errors.time && <p className="text-red-500 text-sm mt-1">{errors.time}</p>}
+                            <TextAreaField label="Description" name="description" value={formData.description} onChange={handleChange} error={errors.description} rows={4} />
+                        </div>
+
+                        {/* Section 2: Schedule & Venue */}
+                        <div className="space-y-6">
+                            <h3 className="text-xl font-semibold text-white border-b border-white/10 pb-2">Schedule & Venue</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <InputField type="date" label="Event Date" name="date" value={formData.date} onChange={handleChange} required />
+                                <InputField type="time" label="Event Time" name="time" value={formData.time} onChange={handleChange} required />
+                            </div>
+                            <InputField label="Venue" name="venue" value={formData.venue} onChange={handleChange} error={errors.venue} required />
+                        </div>
+
+                        {/* Section 3: Registration Rules */}
+                        <div className="space-y-6">
+                            <h3 className="text-xl font-semibold text-white border-b border-white/10 pb-2">Registration Rules</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <InputField type="date" label="Deadline Date" name="registration_deadline_date" value={formData.registration_deadline_date} onChange={handleChange} required />
+                                <InputField type="time" label="Deadline Time" name="registration_deadline_time" value={formData.registration_deadline_time} onChange={handleChange} required />
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <SelectField label="Participation Type" name="team_size" value={formData.team_size} onChange={handleChange} options={['individual', 'team']} />
+                                <SelectField label="Initial Status" name="status" value={formData.status} onChange={handleChange} options={['open', 'closed']} />
                             </div>
                         </div>
 
-                        {/* Venue */}
-                        <div>
-                            <label className="label">
-                                Venue <span className="text-red-500">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                name="venue"
-                                value={formData.venue}
-                                onChange={handleChange}
-                                className={`input-field ${errors.venue ? 'border-red-500' : ''}`}
-                                placeholder="e.g., Main Sports Ground, Indoor Stadium"
-                            />
-                            {errors.venue && <p className="text-red-500 text-sm mt-1">{errors.venue}</p>}
-                        </div>
-
-                        {/* Registration Deadline */}
-                        <div className="grid md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="label">
-                                    Registration Deadline Date <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="date"
-                                    name="registration_deadline_date"
-                                    value={formData.registration_deadline_date}
-                                    onChange={handleChange}
-                                    className={`input-field ${errors.registration_deadline_date ? 'border-red-500' : ''}`}
-                                />
-                                {errors.registration_deadline_date && (
-                                    <p className="text-red-500 text-sm mt-1">{errors.registration_deadline_date}</p>
-                                )}
-                            </div>
-                            <div>
-                                <label className="label">
-                                    Registration Deadline Time <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="time"
-                                    name="registration_deadline_time"
-                                    value={formData.registration_deadline_time}
-                                    onChange={handleChange}
-                                    className={`input-field ${errors.registration_deadline_time ? 'border-red-500' : ''}`}
-                                />
-                                {errors.registration_deadline_time && (
-                                    <p className="text-red-500 text-sm mt-1">{errors.registration_deadline_time}</p>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Team Size */}
-                        <div>
-                            <label className="label">
-                                Team Size <span className="text-red-500">*</span>
-                            </label>
-                            <select
-                                name="team_size"
-                                value={formData.team_size}
-                                onChange={handleChange}
-                                className="input-field"
-                            >
-                                <option value="individual">Individual</option>
-                                <option value="team">Team</option>
-                            </select>
-                        </div>
-
-                        {/* Status */}
-                        <div>
-                            <label className="label">
-                                Status <span className="text-red-500">*</span>
-                            </label>
-                            <select
-                                name="status"
-                                value={formData.status}
-                                onChange={handleChange}
-                                className="input-field"
-                            >
-                                <option value="open">Open</option>
-                                <option value="closed">Closed</option>
-                            </select>
-                        </div>
-
-                        {/* Submit Buttons */}
-                        <div className="flex gap-4 pt-4">
-                            <button
-                                type="button"
-                                onClick={() => navigate('/admin')}
-                                className="btn-secondary flex-1"
-                                disabled={submitting}
-                            >
-                                Cancel
-                            </button>
-                            <button type="submit" className="btn-primary flex-1" disabled={submitting}>
-                                {submitting ? 'Updating...' : 'Update Tournament'}
+                        <div className="pt-6 border-t border-white/10 flex justify-end gap-4">
+                            <button type="button" onClick={() => navigate('/admin')} className="px-6 py-3 rounded-xl hover:bg-white/5 text-gray-300 transition-colors">Cancel</button>
+                            <button type="submit" disabled={submitting} className="btn-primary px-8 py-3 text-lg shadow-lg shadow-indigo-500/20">
+                                {submitting ? 'Updating...' : 'Save Changes'}
                             </button>
                         </div>
                     </form>
@@ -334,5 +172,35 @@ const EditTournament = () => {
         </div>
     );
 };
+
+const InputField = ({ label, error, ...props }: any) => (
+    <div className="space-y-2">
+        <label className="text-sm font-medium text-gray-400 ml-1">{label}</label>
+        <input className={`w-full bg-gray-900/50 border ${error ? 'border-red-500/50' : 'border-white/10'} rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all`} {...props} />
+        {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+    </div>
+);
+
+const TextAreaField = ({ label, error, ...props }: any) => (
+    <div className="space-y-2">
+        <label className="text-sm font-medium text-gray-400 ml-1">{label}</label>
+        <textarea className={`w-full bg-gray-900/50 border ${error ? 'border-red-500/50' : 'border-white/10'} rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all resize-none`} {...props} />
+        {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+    </div>
+);
+
+const SelectField = ({ label, options, ...props }: any) => (
+    <div className="space-y-2">
+        <label className="text-sm font-medium text-gray-400 ml-1">{label}</label>
+        <div className="relative">
+            <select className="w-full bg-gray-900/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all appearance-none cursor-pointer capitalize" {...props}>
+                {options.map((opt: string) => <option key={opt} value={opt} className="bg-gray-900 text-white capitalize">{opt}</option>)}
+            </select>
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+            </div>
+        </div>
+    </div>
+);
 
 export default EditTournament;

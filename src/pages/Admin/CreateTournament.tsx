@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../services/supabaseClient';
+import { useModal } from '../../context/ModalContext';
 
 const CreateTournament = () => {
     const navigate = useNavigate();
+    const { showAlert } = useModal();
     const [submitting, setSubmitting] = useState(false);
     const [formData, setFormData] = useState({
         title: '',
@@ -23,7 +25,6 @@ const CreateTournament = () => {
         setSubmitting(true);
 
         try {
-            // Combine date and time
             const tournamentDate = new Date(`${formData.date}T${formData.time}`);
             const deadlineDate = new Date(`${formData.registration_deadline_date}T${formData.registration_deadline_time}`);
 
@@ -40,10 +41,11 @@ const CreateTournament = () => {
 
             if (error) throw error;
 
+            showAlert('Success', 'Tournament created successfully!');
             navigate('/admin');
         } catch (error: any) {
             console.error('Error:', error);
-            alert('Failed to create tournament: ' + error.message);
+            showAlert('Error', 'Failed to create tournament: ' + error.message);
         } finally {
             setSubmitting(false);
         }
@@ -123,7 +125,6 @@ const CreateTournament = () => {
     );
 };
 
-// Reusing helper components (should ideally be in a shared UI file)
 const InputField = ({ label, ...props }: any) => (
     <div className="space-y-2">
         <label className="text-sm font-medium text-gray-400 ml-1">{label}</label>
