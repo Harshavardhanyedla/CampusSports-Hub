@@ -37,7 +37,7 @@ const Navbar = () => {
 
     return (
         <nav
-            className={`absolute top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-black/20 backdrop-blur-md py-3' : 'bg-transparent py-5'
+            className={`absolute top-0 left-0 right-0 z-[70] transition-all duration-300 ${(scrolled || mobileMenuOpen) ? 'bg-black/20 backdrop-blur-md py-3' : 'bg-transparent py-5'
                 }`}
         >
             <div className="container-custom flex items-center justify-between">
@@ -105,9 +105,9 @@ const Navbar = () => {
 
             {/* Mobile Menu Overlay */}
             <div
-                className={`md:hidden fixed inset-0 bg-gray-900/98 z-40 transition-transform duration-300 ease-in-out ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+                className={`md:hidden fixed inset-0 bg-[#020617] z-[60] transition-transform duration-300 ease-in-out ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
                     }`}
-                style={{ top: '0', paddingTop: '80px', transform: 'translateZ(0)' }}
+                style={{ top: '0', paddingTop: '100px' }}
             >
                 <div className="flex flex-col items-center gap-8 p-8">
                     {isAdminPath && isAdminAuth ? (
