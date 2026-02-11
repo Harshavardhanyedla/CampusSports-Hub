@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase, type Tournament, type Registration } from '../../services/supabaseClient';
 import { format } from 'date-fns';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useModal } from '../../context/ModalContext';
 
 interface RegistrationWithTournament extends Registration {
@@ -10,7 +10,7 @@ interface RegistrationWithTournament extends Registration {
 
 const MyRegistrations = () => {
     const location = useLocation();
-    const navigate = useNavigate();
+
     const { showAlert } = useModal();
     const [email, setEmail] = useState('');
     const [registrations, setRegistrations] = useState<RegistrationWithTournament[]>([]);
@@ -64,14 +64,10 @@ const MyRegistrations = () => {
         if (emailToSearch) {
             setEmail(emailToSearch);
             fetchRegistrations(emailToSearch);
-
-            // Clear state and storage after loading
-            if (state?.email) {
-                navigate(location.pathname, { replace: true, state: {} });
-            }
-            localStorage.removeItem('last_registered_email');
+            // Save it back to localStorage to make it permanent
+            localStorage.setItem('last_registered_email', emailToSearch);
         }
-    }, [location.state, location.pathname, fetchRegistrations, navigate]);
+    }, [location.state, fetchRegistrations]);
 
     return (
         <div className="min-h-screen container-custom py-12">

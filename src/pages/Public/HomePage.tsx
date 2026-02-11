@@ -11,6 +11,12 @@ const HomePage = () => {
 
 
     useEffect(() => {
+        // Load from cache first for "permanent" feel
+        const cachedTournaments = localStorage.getItem('cached_tournaments');
+        if (cachedTournaments) {
+            setTournaments(JSON.parse(cachedTournaments));
+            setLoading(false); // No need to show loading if we have cached data
+        }
         fetchTournaments();
     }, []);
 
@@ -22,7 +28,11 @@ const HomePage = () => {
                 .order('date', { ascending: true });
 
             if (error) throw error;
-            setTournaments(data || []);
+            const fetchedData = data || [];
+            setTournaments(fetchedData);
+
+            // Update cache
+            localStorage.setItem('cached_tournaments', JSON.stringify(fetchedData));
         } catch (error) {
             console.error('Error fetching tournaments:', error);
         } finally {

@@ -113,7 +113,7 @@ const ViewRegistrations = () => {
                                 <tr className="border-b border-white/10">
                                     <th className="pb-4 pt-2 font-semibold text-gray-400">Student Info</th>
                                     <th className="pb-4 pt-2 font-semibold text-gray-400">Identity</th>
-                                    <th className="pb-4 pt-2 font-semibold text-gray-400">Department</th>
+                                    <th className="pb-4 pt-2 font-semibold text-gray-400">Degree Department</th>
                                     <th className="pb-4 pt-2 font-semibold text-gray-400">Year</th>
                                     <th className="pb-4 pt-2 font-semibold text-gray-400">Contact</th>
                                     <th className="pb-4 pt-2 font-semibold text-gray-400">Registered</th>

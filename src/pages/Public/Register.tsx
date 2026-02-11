@@ -136,18 +136,36 @@ const Register = () => {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <SelectField
-                                label="Department"
+                                label="Degree Department"
                                 name="department"
                                 value={formData.department}
                                 onChange={handleChange}
-                                options={['CSE', 'ECE', 'MECH', 'CIVIL', 'IT', 'AI&DS', 'MBA', 'Other']}
+                                options={[
+                                    'B.Sc Computer Science',
+                                    'B.Sc Data Science',
+                                    'BCA',
+                                    'B.Com (Computers)',
+                                    'B.Sc Mathematics',
+                                    'B.Sc Physics',
+                                    'B.Sc Statistics',
+                                    'B.Sc Chemistry',
+                                    'B.Sc Microbiology',
+                                    'B.Sc Bio-Chemistry',
+                                    'B.Sc Bio-Technology',
+                                    'B.Sc AI & ML',
+                                    'B.Sc AI & Robotics',
+                                    'MCA',
+                                    'M.Sc Organic Chemistry',
+                                    'M.Sc Analytical Chemistry',
+                                    'Other'
+                                ]}
                             />
                             <SelectField
                                 label="Year of Study"
                                 name="year"
                                 value={formData.year}
                                 onChange={handleChange}
-                                options={['1st Year', '2nd Year', '3rd Year', '4th Year', 'PG']}
+                                options={['1st Year', '2nd Year', '3rd Year', 'PG']}
                             />
                         </div>
 

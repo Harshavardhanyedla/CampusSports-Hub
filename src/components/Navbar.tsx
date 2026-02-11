@@ -106,8 +106,8 @@ const Navbar = () => {
             {/* Mobile Menu Overlay - Premium Center Pop */}
             <div
                 className={`md:hidden fixed inset-0 w-screen h-screen bg-[#020617] backdrop-blur-xl transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] ${mobileMenuOpen
-                        ? 'opacity-100 visible pointer-events-auto z-[90]'
-                        : 'opacity-0 invisible pointer-events-none z-[-1]'
+                    ? 'opacity-100 visible pointer-events-auto z-[90]'
+                    : 'opacity-0 invisible pointer-events-none z-[-1]'
                     }`}
             >
                 <div className={`flex flex-col items-center justify-center gap-10 h-full p-8 transition-all duration-500 delay-75 ${mobileMenuOpen ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-12 scale-90 opacity-0'
